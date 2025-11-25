@@ -5,46 +5,49 @@
     <title>jQuery Page Flip Example</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="js/turn.min.js"></script> <!-- Downloaded Turn.js -->
-    <style>
-        body {
-            background: #ccc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        #flipbook {
-            width: 800px;
-            height: 500px;
-        }
-        #flipbook .page {
-            background: white;
-            border: 1px solid #ddd;
-            font-size: 20px;
-            text-align: center;
-            line-height: 500px;
-        }
-    </style>
+ flipbook {
+display: flex;
+perspective: 1000px;
+}
+
+page {
+width: 200px;
+height: 300px;
+margin: 0 5px;
+background: #f0f0f0;
+border: 1px solid #ccc;
+transform-origin: left;
+transform-style: preserve-3d;
+transition: transform 0.6s ease-in-out;
+}
+
+page:hover {
+transform: rotateY(-180deg);
+}
+
+
+    page.flipped {
+transform: rotateY(-180deg);
+}
 </head>
 <body>
 <h1>Hello, World!</h1>
 <p>This is my first HTML page.</p>
 
-<div id="flipbook">
-    <div class="page">Page 1</div>
-    <div class="page">Page 2</div>
-    <div class="page">Page 3</div>
-    <div class="page">Page 4</div>
+<div class="flipbook">
+<div class="page">Page 1</div>
+<div class="page">Page 2</div>
+<div class="page">Page 3</div>
+<div class="page">Page 4</div>
 </div>
 
 <script>
-$(document).ready(function(){
-    // Initialize Turn.js
-    $("#flipbook").turn({
-        width: 800,
-        height: 500,
-        autoCenter: true
-    });
+const pages = document.querySelectorAll('.page');
+
+pages.forEach((page) => {
+page.addEventListener('click', () => {
+page.classList.toggle('flipped');
+});
 });
 </script>
 
