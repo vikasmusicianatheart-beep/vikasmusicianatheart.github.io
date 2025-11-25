@@ -1,55 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>jQuery Page Flip Example</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="js/turn.min.js"></script> <!-- Downloaded Turn.js -->
- flipbook {
-display: flex;
-perspective: 1000px;
-}
-
-page {
-width: 200px;
-height: 300px;
-margin: 0 5px;
-background: #f0f0f0;
-border: 1px solid #ccc;
-transform-origin: left;
-transform-style: preserve-3d;
-transition: transform 0.6s ease-in-out;
-}
-
-page:hover {
-transform: rotateY(-180deg);
-}
-
-
-    page.flipped {
-transform: rotateY(-180deg);
-}
-</head>
-<body>
-<h1>Hello, World!</h1>
-<p>This is my first HTML page.</p>
-
-<div class="flipbook">
-<div class="page">Page 1</div>
-<div class="page">Page 2</div>
-<div class="page">Page 3</div>
-<div class="page">Page 4</div>
+<div class="imgLoader"></div>
+ 
+<div class="container">
+ 
+  <h1 class="title">
+    Turning pages<br>with css
+  </h1>
+ 
+  <div class="credit">
+    * Images loaded randomly from Picsum.photos
+  </div>
+ 
+  <div class="book">
+    <div class="gap"></div>
+    <div class="pages">
+      <div class="page"></div>
+      <div class="page"></div>
+      <div class="page"></div>
+      <div class="page"></div>
+      <div class="page"></div>
+      <div class="page"></div>
+    </div>
+    <div class="flips">
+      <div class="flip flip1">
+        <div class="flip flip2">
+          <div class="flip flip3">
+            <div class="flip flip4">
+              <div class="flip flip5">
+                <div class="flip flip6">
+                  <div class="flip flip7"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-
-<script>
-const pages = document.querySelectorAll('.page');
-
-pages.forEach((page) => {
-page.addEventListener('click', () => {
-page.classList.toggle('flipped');
-});
-});
-</script>
-
-</body>
-</html>
+ 
+<a href="https://twitter.com/amit_sheen" class="twitterLink" target="_top">
+   <img src="https://assets.codepen.io/1948355/twitterLogo2.png" />
+</a>
