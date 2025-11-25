@@ -1,55 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Page Turn Animation</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
 <body>
+
  <style>
-container {
- perspective: 1000px;
-}
-book {
- position: relative;
- width: 300px;
- height: 400px;
-}
-pages {
- position: absolute;
- width: 100%;
- height: 100%;
-}
-page {
- position: absolute;
- width: 100%;
- height: 100%;
- background-color: #f0f0f0;
- border: 1px solid #ccc;
- transform-origin: left center;
- transition: transform 0.6s ease-in-out;
-}
-page:nth-child(1) { transform: rotateY(0deg); }
-page:nth-child(2) { transform: rotateY(-180deg); }
-page:nth-child(3) { transform: rotateY(-360deg); }
-page:nth-child(4) { transform: rotateY(-540deg); }
-book:hover .page {
- transform: rotateY(180deg);
+body {
+    background: #ececec;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
-</style>
+.book {
+    position: relative;
+    width: 350px;
+    height: 500px;
+    perspective: 1500px;
+}
+
+.page {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: transform 1s ease;
+    cursor: pointer;
+}
+
+.page .front,
+.page .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    border: 1px solid #aaa;
+    background: white;
+}
+
+.page .back {
+    transform: rotateY(180deg);
+    background: #f5f5f5;
+}
+
+.page {
+    z-index: 10;
+}
+
+/* Flipped state */
+.page.flipped {
+    transform: rotateY(-180deg);
+    z-index: 1;
+}
+
+  $(document).ready(function () {
+    $(".page").each(function (i) {
+        $(this).css("z-index", $(".page").length - i);
+    });
+
+    $(".page").on("click", function () {
+        $(this).toggleClass("flipped");
+
+        // Recalculate z-index after flipping
+        $(".page").each(function () {
+            if ($(this).hasClass("flipped")) {
+                $(this).css("z-index", 1);
+            } else {
+                let pageNum = $(this).data("page");
+                $(this).css("z-index", 100 - pageNum);
+            }
+        });
+    });
+});
 
 
+  
+  </style>
 
- 
-<div class="container">
- 
-  <h1 class="title">
-    Turning pages<br>with css
-  </h1>
- 
-  <div class="container">
-<h1 class="title">Flip Page Effect</h1>
 <div class="book">
-<div class="pages">
-<div class="page">Page 1</div>
-<div class="page">Page 2</div>
-<div class="page">Page 3</div>
-<div class="page">Page 4</div>
-</div>
+
+    <!-- Add as many pages as you like -->
+    <div class="page" data-page="1">
+        <div class="front">Page 1 (Front)</div>
+        <div class="back">Page 1 (Back)</div>
+    </div>
+
+    <div class="page" data-page="2">
+        <div class="front">Page 2 (Front)</div>
+        <div class="back">Page 2 (Back)</div>
+    </div>
+
+    <div class="page" data-page="3">
+        <div class="front">Page 3 (Front)</div>
+        <div class="back">Page 3 (Back)</div>
+    </div>
+
 </div>
 
+<script src="script.js"></script>
 </body>
+</html>
+
