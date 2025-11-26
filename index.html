@@ -2,48 +2,77 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Multi-Project Excel Dashboard</title>
+<title>Advanced Multi-Project Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="style.css">
+<style>
+body.light-mode { background: #f8f9fa; color: #212529; }
+body.dark-mode { background: #121212; color: #f8f9fa; }
+.drop-zone { border: 3px dashed #0d6efd; padding:40px; text-align:center; border-radius:12px; cursor:pointer; transition:0.3s; }
+.drop-zone.dragover { background:#d0e3ff; border-color:#0056d2; }
+#fileInput { display:none; }
+.card.dark-mode { background-color:#1e1e1e; color:#f8f9fa; transition:0.3s; }
+.card:hover { transform:scale(1.02); transition:0.3s; }
+canvas { max-width:100%; height:300px; }
+</style>
 </head>
-<body class="bg-light">
+<body class="light-mode">
 
 <div class="container py-4">
+  <h2 class="mb-4 text-center">Advanced Multi-Project Excel Dashboard</h2>
 
-  <h2 class="mb-4 text-center">Multi-Project Excel Dashboard</h2>
-
-  <!-- Instructions Section -->
+  <!-- Instructions -->
   <div class="card mb-4 p-3 shadow-sm">
     <h5>Instructions:</h5>
     <ul>
-      <li>Drag & drop one or multiple Excel files into the drop zone below.</li>
-      <li>Each sheet in an Excel file represents a separate project.</li>
-      <li>Excel sheet columns should include: <b>Date, Title, Type (Credit/Debit), Amount, Category</b>.</li>
-      <li>After import, select a project to view dashboard metrics and charts.</li>
-      <li>You can compare multiple projects via comparison charts.</li>
-      <li>Use the theme toggle for Dark/Light mode.</li>
+      <li>Drag & drop one or more Excel files below or click to select files.</li>
+      <li>Each sheet in Excel is treated as a separate project.</li>
+      <li>Columns required: <b>Date, Title, Type (Credit/Debit), Amount, Category</b>.</li>
+      <li>Select project(s) from the dropdown and use filters below to analyze data.</li>
+      <li>Dark/Light mode toggle is available.</li>
     </ul>
   </div>
 
-  <!-- Theme Toggle -->
+  <!-- Theme toggle -->
   <div class="d-flex justify-content-end mb-3">
     <button id="themeToggle" class="btn btn-secondary">Dark Mode</button>
   </div>
 
-  <!-- Excel Upload -->
+  <!-- Excel Drop Zone -->
   <div id="dropZone" class="drop-zone shadow-sm mb-4">
     <h4>Import Excel File(s)</h4>
-    <p class="text-muted">Drag & drop Excel file(s) here, or click to select</p>
+    <p class="text-muted">Drag & drop files here or click to select</p>
     <input type="file" id="fileInput" accept=".xlsx,.xls" multiple>
   </div>
 
   <!-- Project Selector -->
-  <div id="projectSection" style="display:none;">
-    <label>Select Project:</label>
-    <select id="projectSelect" class="form-select mb-3"></select>
+  <div id="projectSection" style="display:none;" class="mb-3">
+    <label>Select Project(s):</label>
+    <select id="projectSelect" class="form-select" multiple></select>
+  </div>
+
+  <!-- Filters -->
+  <div id="filters" style="display:none;" class="mb-4 card p-3 shadow-sm">
+    <h5>Filters</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label>Date Range</label>
+        <input type="date" id="startDate" class="form-control">
+        <input type="date" id="endDate" class="form-control mt-1">
+      </div>
+      <div class="col-md-4">
+        <label>Category</label>
+        <input type="text" id="categoryFilter" class="form-control" placeholder="Category">
+      </div>
+      <div class="col-md-4">
+        <label>Amount Range</label>
+        <input type="number" id="minAmount" class="form-control" placeholder="Min">
+        <input type="number" id="maxAmount" class="form-control mt-1" placeholder="Max">
+      </div>
+    </div>
+    <button id="applyFilters" class="btn btn-primary mt-3">Apply Filters</button>
   </div>
 
   <!-- Summary Cards -->
@@ -55,3 +84,222 @@
       </div>
     </div>
     <div class="col-md-3">
+      <div class="card p-3 text-center shadow-sm">
+        <h6>Total Debit</h6>
+        <h3 id="totalDebit">0</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3 text-center shadow-sm">
+        <h6>Total Revenue</h6>
+        <h3 id="totalRevenue">0</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3 text-center shadow-sm">
+        <h6>Status</h6>
+        <h3 id="profitLoss">–</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div id="charts" style="display:none;">
+    <div class="row g-4 mb-4">
+      <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+          <h5>Cash Flow Over Time</h5>
+          <canvas id="cashFlowChart"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+          <h5>Category Distribution</h5>
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="mb-3">Project Comparison</h4>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+          <h5>Profit/Loss Comparison</h5>
+          <canvas id="projectProfitChart"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+          <h5>Credit vs Debit Comparison</h5>
+          <canvas id="creditDebitChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  let projects = {};
+  let cashFlowChart, categoryChart, projectProfitChart, creditDebitChart;
+
+  const dropZone = document.getElementById("dropZone");
+  const fileInput = document.getElementById("fileInput");
+  const projectSelect = document.getElementById("projectSelect");
+  const projectSection = document.getElementById("projectSection");
+  const summaryCards = document.getElementById("summaryCards");
+  const chartsDiv = document.getElementById("charts");
+  const filtersDiv = document.getElementById("filters");
+  const themeToggle = document.getElementById("themeToggle");
+  const startDateInput = document.getElementById("startDate");
+  const endDateInput = document.getElementById("endDate");
+  const categoryInput = document.getElementById("categoryFilter");
+  const minAmountInput = document.getElementById("minAmount");
+  const maxAmountInput = document.getElementById("maxAmount");
+  const applyFiltersBtn = document.getElementById("applyFilters");
+
+  themeToggle.addEventListener("click", ()=>{
+    document.body.classList.toggle("dark-mode");
+    document.body.classList.toggle("light-mode");
+    updateAllChartsTheme();
+  });
+
+  dropZone.addEventListener("click", ()=>fileInput.click());
+  dropZone.addEventListener("dragover", e=>{ e.preventDefault(); dropZone.classList.add("dragover"); });
+  dropZone.addEventListener("dragleave", ()=>dropZone.classList.remove("dragover"));
+  dropZone.addEventListener("drop", e=>{ e.preventDefault(); dropZone.classList.remove("dragover"); handleFiles(e.dataTransfer.files); });
+  fileInput.addEventListener("change", e=> handleFiles(e.target.files));
+  applyFiltersBtn.addEventListener("click", ()=> updateDashboard());
+
+  function handleFiles(files){
+    if(!files.length) return;
+    projects = {};
+    let loaded = 0;
+    Array.from(files).forEach(file=>{
+      const reader = new FileReader();
+      reader.onload = function(e){
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data,{type:'array'});
+        workbook.SheetNames.forEach(sheetName=>{
+          let sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+          sheet.forEach(r=>{r.Amount=Number(r.Amount)||0; r.Type=r.Type||"Credit"; r.Project=sheetName;});
+          projects[sheetName] = sheet;
+        });
+        loaded++;
+        if(loaded===files.length) populateProjects();
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  function populateProjects(){
+    projectSelect.innerHTML = "";
+    Object.keys(projects).forEach(p=>{
+      let opt = document.createElement("option");
+      opt.value = p; opt.textContent=p;
+      projectSelect.appendChild(opt);
+    });
+    projectSelect.onchange = updateDashboard;
+    projectSection.style.display="block";
+    filtersDiv.style.display="block";
+    summaryCards.style.display="flex";
+    chartsDiv.style.display="block";
+    updateDashboard();
+  }
+
+  function updateDashboard(){
+    const selectedProjects = Array.from(projectSelect.selectedOptions).map(o=>o.value);
+    if(selectedProjects.length===0) return;
+
+    let combinedRows = [];
+    selectedProjects.forEach(p=>{
+      let rows = projects[p];
+      rows.forEach(r=>{
+        // Apply filters
+        let dateOk=true, catOk=true, amtOk=true;
+        if(startDateInput.value && new Date(r.Date)<new Date(startDateInput.value)) dateOk=false;
+        if(endDateInput.value && new Date(r.Date)>new Date(endDateInput.value)) dateOk=false;
+        if(categoryInput.value && !r.Category.toLowerCase().includes(categoryInput.value.toLowerCase())) catOk=false;
+        if(minAmountInput.value && r.Amount<Number(minAmountInput.value)) amtOk=false;
+        if(maxAmountInput.value && r.Amount>Number(maxAmountInput.value)) amtOk=false;
+        if(dateOk && catOk && amtOk) combinedRows.push(r);
+      });
+    });
+
+    // Summary
+    let credit=0, debit=0;
+    combinedRows.forEach(r=> r.Type.toLowerCase()==='credit'?credit+=r.Amount:debit+=r.Amount);
+    const revenue = credit;
+    const balance = credit-debit;
+    document.getElementById("totalCredit").textContent = credit;
+    document.getElementById("totalDebit").textContent = debit;
+    document.getElementById("totalRevenue").textContent = revenue;
+    const pl = document.getElementById("profitLoss");
+    pl.textContent = balance>=0?"PROFIT":"LOSS";
+    pl.style.color = balance>=0?"green":"red";
+
+    renderCashFlowChart(combinedRows);
+    renderCategoryChart(combinedRows);
+    renderComparisonCharts(selectedProjects);
+  }
+
+  function renderCashFlowChart(rows){
+    const labels = rows.map(r=>r.Date);
+    const data = rows.map(r=>r.Type.toLowerCase()==='credit'?r.Amount:-r.Amount);
+    if(cashFlowChart) cashFlowChart.destroy();
+    cashFlowChart = new Chart(document.getElementById("cashFlowChart"),{
+      type:'line',
+      data:{labels,datasets:[{label:"Cash Flow",data,borderColor:"#0d6efd",tension:0.3}]},
+      options:{animation:{duration:1000}, responsive:true}
+    });
+  }
+
+  function renderCategoryChart(rows){
+    const totals = {};
+    rows.forEach(r=>totals[r.Category]=(totals[r.Category]||0)+r.Amount);
+    if(categoryChart) categoryChart.destroy();
+    categoryChart = new Chart(document.getElementById("categoryChart"),{
+      type:'pie',
+      data:{labels:Object.keys(totals), datasets:[{data:Object.values(totals), backgroundColor:["#ff6384","#36a2eb","#ffce56","#4caf50","#9c27b0","#ffa500","#00bfff"]}]},
+      options:{animation:{duration:1000}}
+    });
+  }
+
+  function renderComparisonCharts(selectedProjects){
+    const names = selectedProjects;
+    const profits=[], credits=[], debits=[];
+    names.forEach(p=>{
+      const rows = projects[p];
+      let c=0,d=0;
+      rows.forEach(r=> r.Type.toLowerCase()==='credit'?c+=r.Amount:d+=r.Amount);
+      profits.push(c-d);
+      credits.push(c);
+      debits.push(d);
+    });
+
+    if(projectProfitChart) projectProfitChart.destroy();
+    projectProfitChart = new Chart(document.getElementById("projectProfitChart"),{
+      type:'bar',
+      data:{labels:names, datasets:[{label:"Profit/Loss", data:profits, backgroundColor:profits.map(v=>v>=0?"#4caf50":"#f44336")}]},
+      options:{animation:{duration:1000}, responsive:true}
+    });
+
+    if(creditDebitChart) creditDebitChart.destroy();
+    creditDebitChart = new Chart(document.getElementById("creditDebitChart"),{
+      type:'bar',
+      data:{labels:names, datasets:[{label:"Credit",data:credits, backgroundColor:"#0d6efd"},{label:"Debit",data:debits, backgroundColor:"#dc3545"}]},
+      options:{animation:{duration:1000}, responsive:true}
+    });
+  }
+
+  function updateAllChartsTheme(){
+    [cashFlowChart,categoryChart,projectProfitChart,creditDebitChart].forEach(c=>{
+      if(c){ c.options.plugins.legend.labels.color=document.body.classList.contains("dark-mode")?'#f8f9fa':'#212529'; c.update();}
+    });
+  }
+
+});
+</script>
+
+</body>
+</html>
