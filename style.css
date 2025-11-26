@@ -1,3 +1,6 @@
+body.light-mode { background: #f8f9fa; color: #212529; }
+body.dark-mode { background: #121212; color: #f8f9fa; }
+
 .drop-zone {
     border: 3px dashed #0d6efd;
     padding: 40px;
@@ -7,16 +10,8 @@
     cursor: pointer;
     transition: 0.3s;
 }
+.drop-zone.dragover { background: #d0e3ff; border-color: #0056d2; }
+#fileInput { display: none; }
 
-.drop-zone:hover {
-    background: #e9f2ff;
-}
-
-.drop-zone.dragover {
-    background: #d0e3ff;
-    border-color: #0056d2;
-}
-
-#fileInput {
-    display: none;
-}
+.card.dark-mode { background-color: #1e1e1e; color: #f8f9fa; }
+.table-dark { background-color: #343a40 !important; }
