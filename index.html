@@ -10,9 +10,6 @@
 <style>
 body.light-mode { background: #f8f9fa; color: #212529; }
 body.dark-mode { background: #121212; color: #f8f9fa; }
-.drop-zone { border: 3px dashed #0d6efd; padding:40px; text-align:center; border-radius:12px; cursor:pointer; transition:0.3s; }
-.drop-zone.dragover { background:#d0e3ff; border-color:#0056d2; }
-#fileInput { display:none; }
 .card.dark-mode { background-color:#1e1e1e; color:#f8f9fa; transition:0.3s; }
 .card:hover { transform:scale(1.02); transition:0.3s; }
 canvas { max-width:100%; height:300px; }
@@ -21,27 +18,26 @@ canvas { max-width:100%; height:300px; }
 <body class="light-mode">
 
 <div class="container py-4">
-  <h2 class="mb-4 text-center">Multi-Project Excel Dashboard (Multi-Source)</h2>
+  <h2 class="mb-4 text-center">Multi-Project Excel Dashboard</h2>
 
   <div class="card mb-4 p-3 shadow-sm">
     <h5>Instructions:</h5>
     <ul>
-      <li>Click "Add Excel File" to import multiple Excel sheets over time.</li>
-      <li>Each sheet is treated as a separate project.</li>
+      <li>Click "Add Excel File" to import one or more Excel files.</li>
+      <li>Each sheet in the Excel file is treated as a separate project.</li>
       <li>Required columns: <b>Date, Title, Type (Credit/Debit), Amount, Category</b>.</li>
-      <li>Select one or more projects to compare their data.</li>
-      <li>Charts update automatically when projects or filters are changed.</li>
-      <li>Use Dark/Light mode for better visibility.</li>
+      <li>Select one or more projects for comparison.</li>
+      <li>Charts and summary cards update automatically.</li>
+      <li>Use Dark/Light mode toggle for theme.</li>
     </ul>
   </div>
 
-  <!-- Theme toggle -->
+  <!-- Theme toggle and Add file -->
   <div class="d-flex justify-content-between mb-3">
     <button id="themeToggle" class="btn btn-secondary">Dark Mode</button>
     <button id="addFileBtn" class="btn btn-primary">Add Excel File</button>
   </div>
-
-  <input type="file" id="fileInput" accept=".xlsx,.xls">
+  <input type="file" id="fileInput" accept=".xlsx,.xls" multiple style="display:none;">
 
   <!-- Project Selector -->
   <div id="projectSection" style="display:none;" class="mb-3">
@@ -73,63 +69,23 @@ canvas { max-width:100%; height:300px; }
 
   <!-- Summary Cards -->
   <div class="row g-3 mb-4" id="summaryCards" style="display:none;">
-    <div class="col-md-3">
-      <div class="card p-3 text-center shadow-sm">
-        <h6>Total Credit</h6>
-        <h3 id="totalCredit">0</h3>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card p-3 text-center shadow-sm">
-        <h6>Total Debit</h6>
-        <h3 id="totalDebit">0</h3>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card p-3 text-center shadow-sm">
-        <h6>Total Revenue</h6>
-        <h3 id="totalRevenue">0</h3>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card p-3 text-center shadow-sm">
-        <h6>Status</h6>
-        <h3 id="profitLoss">–</h3>
-      </div>
-    </div>
+    <div class="col-md-3"><div class="card p-3 text-center shadow-sm"><h6>Total Credit</h6><h3 id="totalCredit">0</h3></div></div>
+    <div class="col-md-3"><div class="card p-3 text-center shadow-sm"><h6>Total Debit</h6><h3 id="totalDebit">0</h3></div></div>
+    <div class="col-md-3"><div class="card p-3 text-center shadow-sm"><h6>Total Revenue</h6><h3 id="totalRevenue">0</h3></div></div>
+    <div class="col-md-3"><div class="card p-3 text-center shadow-sm"><h6>Status</h6><h3 id="profitLoss">–</h3></div></div>
   </div>
 
   <!-- Charts -->
   <div id="charts" style="display:none;">
     <div class="row g-4 mb-4">
-      <div class="col-md-6">
-        <div class="card p-3 shadow-sm">
-          <h5>Cash Flow Over Time</h5>
-          <canvas id="cashFlowChart"></canvas>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card p-3 shadow-sm">
-          <h5>Category Distribution</h5>
-          <canvas id="categoryChart"></canvas>
-        </div>
-      </div>
+      <div class="col-md-6"><div class="card p-3 shadow-sm"><h5>Cash Flow Over Time</h5><canvas id="cashFlowChart"></canvas></div></div>
+      <div class="col-md-6"><div class="card p-3 shadow-sm"><h5>Category Distribution</h5><canvas id="categoryChart"></canvas></div></div>
     </div>
 
     <h4 class="mb-3">Project Comparison</h4>
     <div class="row g-4">
-      <div class="col-md-6">
-        <div class="card p-3 shadow-sm">
-          <h5>Profit/Loss Comparison</h5>
-          <canvas id="projectProfitChart"></canvas>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card p-3 shadow-sm">
-          <h5>Credit vs Debit Comparison</h5>
-          <canvas id="creditDebitChart"></canvas>
-        </div>
-      </div>
+      <div class="col-md-6"><div class="card p-3 shadow-sm"><h5>Profit/Loss Comparison</h5><canvas id="projectProfitChart"></canvas></div></div>
+      <div class="col-md-6"><div class="card p-3 shadow-sm"><h5>Credit vs Debit Comparison</h5><canvas id="creditDebitChart"></canvas></div></div>
     </div>
   </div>
 
@@ -137,7 +93,7 @@ canvas { max-width:100%; height:300px; }
 
 <script>
 document.addEventListener("DOMContentLoaded", function(){
-  let projects = {}; // key: project name, value: array of rows
+  let projects = {}; // key = project name, value = array of rows
   let cashFlowChart, categoryChart, projectProfitChart, creditDebitChart;
 
   const fileInput = document.getElementById("fileInput");
@@ -178,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function(){
         workbook.SheetNames.forEach(sheetName=>{
           let sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
           sheet.forEach(r=>{r.Amount=Number(r.Amount)||0; r.Type=r.Type||"Credit"; r.Project=sheetName;});
-          // Add/merge project if already exists
+          // Merge if project already exists
           if(projects[sheetName]) projects[sheetName] = projects[sheetName].concat(sheet);
           else projects[sheetName] = sheet;
         });
