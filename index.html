@@ -1,115 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Page Turn Animation</title>
-<link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<title>Multi-Project Finance Dashboard</title>
+<link rel="stylesheet" href="style.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
- <style>
-body {
-    background: #ececec;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
+<div class="sidebar">
+    <h2>Projects</h2>
+    <ul id="projectList"></ul>
+    <button id="addProjectBtn">+ Add Project</button>
+</div>
 
-.book {
-    position: relative;
-    width: 350px;
-    height: 500px;
-    perspective: 1500px;
-}
+<div class="main">
+    <h1 id="projectTitle">Select a Project</h1>
 
-.page {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    transform-style: preserve-3d;
-    transition: transform 1s ease;
-    cursor: pointer;
-}
+    <div id="dashboardContent" style="display:none">
 
-.page .front,
-.page .back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 28px;
-    border: 1px solid #aaa;
-    background: white;
-}
+        <div class="summary">
+            <div class="card"><h3>Credit</h3><p id="totalCredit">0</p></div>
+            <div class="card"><h3>Debit</h3><p id="totalDebit">0</p></div>
+            <div class="card"><h3>Balance</h3><p id="netBalance">0</p></div>
+            <div class="card"><h3>Status</h3><p id="profitLoss">–</p></div>
+        </div>
 
-.page .back {
-    transform: rotateY(180deg);
-    background: #f5f5f5;
-}
+        <h2>Transactions</h2>
 
-.page {
-    z-index: 10;
-}
+        <button id="addTransactionBtn">+ Add Entry</button>
 
-/* Flipped state */
-.page.flipped {
-    transform: rotateY(-180deg);
-    z-index: 1;
-}
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th><th>Title</th><th>Type</th><th>Amount</th><th>Category</th><th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="transactionTable"></tbody>
+        </table>
 
+        <h2>Financial Chart</h2>
+        <canvas id="financeChart"></canvas>
 
-
-  
-  </style>
-
-<div class="book">
-
-    <!-- Add as many pages as you like -->
-    <div class="page" data-page="1">
-        <div class="front">Page 1 (Front)</div>
-        <div class="back">Page 1 (Back)</div>
     </div>
+</div>
 
-    <div class="page" data-page="2">
-        <div class="front">Page 2 (Front)</div>
-        <div class="back">Page 2 (Back)</div>
+<!-- Add project modal -->
+<div class="modal" id="projectModal">
+    <div class="modal-content">
+        <h2>Add Project</h2>
+        <input type="text" id="projectNameInput" placeholder="Project Name">
+        <button id="saveProjectBtn">Save</button>
+        <button class="closeModal">Cancel</button>
     </div>
+</div>
 
-    <div class="page" data-page="3">
-        <div class="front">Page 3 (Front)</div>
-        <div class="back">Page 3 (Back)</div>
+<!-- Add transaction modal -->
+<div class="modal" id="transactionModal">
+    <div class="modal-content">
+        <h2>Add Transaction</h2>
+        <input type="date" id="tDate">
+        <input type="text" id="tTitle" placeholder="Title">
+        <select id="tType">
+            <option value="credit">Credit</option>
+            <option value="debit">Debit</option>
+        </select>
+        <input type="number" id="tAmount" placeholder="Amount">
+        <input type="text" id="tCategory" placeholder="Category">
+        <button id="saveTransactionBtn">Save</button>
+        <button class="closeModal">Cancel</button>
     </div>
-  $(document).ready(function () {
-    $(".page").each(function (i) {
-        $(this).css("z-index", $(".page").length - i);
-    });
-
-    $(".page").on("click", function () {
-        $(this).toggleClass("flipped");
-
-        // Recalculate z-index after flipping
-        $(".page").each(function () {
-            if ($(this).hasClass("flipped")) {
-                $(this).css("z-index", 1);
-            } else {
-                let pageNum = $(this).data("page");
-                $(this).css("z-index", 100 - pageNum);
-            }
-        });
-    });
-});
-
 </div>
 
 <script src="script.js"></script>
 </body>
 </html>
-
