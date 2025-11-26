@@ -2,26 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Excel Project Dashboard</title>
-
-<!-- Bootstrap -->
+<title>Advanced Project Dashboard</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
 <link rel="stylesheet" href="style.css">
 
-<!-- Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js" defer></script>
-
 </head>
 <body class="bg-light">
 
-<div class="container py-5">
+<div class="container py-4">
 
-    <!-- Excel Import Section -->
-    <div id="dropZone" class="drop-zone shadow-sm">
-        <h3><strong>Import Excel File</strong></h3>
+    <!-- Theme Toggle -->
+    <div class="d-flex justify-content-end mb-3">
+        <button id="themeToggle" class="btn btn-secondary">Dark Mode</button>
+    </div>
+
+    <!-- Excel Import -->
+    <div id="dropZone" class="drop-zone shadow-sm mb-4">
+        <h3>Import Excel File</h3>
         <p class="text-muted">Drag & drop .xlsx file here, or click to choose</p>
         <input type="file" id="fileInput" accept=".xlsx,.xls">
     </div>
@@ -29,54 +29,110 @@
     <!-- Dashboard -->
     <div id="dashboard" style="display:none">
 
-        <h2 class="mb-4 fw-bold">Project Dashboard</h2>
-
-        <!-- Project Selector -->
-        <div class="mb-3">
-            <label class="form-label">Select Project</label>
-            <select id="projectSelect" class="form-select"></select>
+        <!-- Filters -->
+        <div class="row mb-3 g-3">
+            <div class="col-md-3">
+                <label>Date Range</label>
+                <input type="date" id="startDate" class="form-control">
+                <input type="date" id="endDate" class="form-control mt-1">
+            </div>
+            <div class="col-md-3">
+                <label>Category</label>
+                <select id="categoryFilter" class="form-select" multiple></select>
+            </div>
+            <div class="col-md-3">
+                <label>Amount Range</label>
+                <input type="number" id="minAmount" class="form-control" placeholder="Min">
+                <input type="number" id="maxAmount" class="form-control mt-1" placeholder="Max">
+            </div>
+            <div class="col-md-3">
+                <label>Project</label>
+                <select id="projectSelect" class="form-select"></select>
+            </div>
         </div>
 
         <!-- Summary Cards -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-3"><div class="card p-3 text-center"><h6>Total Credit</h6><h3 id="totalCredit">0</h3></div></div>
-            <div class="col-md-3"><div class="card p-3 text-center"><h6>Total Debit</h6><h3 id="totalDebit">0</h3></div></div>
-            <div class="col-md-3"><div class="card p-3 text-center"><h6>Net Balance</h6><h3 id="netBalance">0</h3></div></div>
-            <div class="col-md-3"><div class="card p-3 text-center"><h6>Status</h6><h3 id="profitLoss">–</h3></div></div>
+        <div class="row g-3 mb-4" id="summaryCards">
+            <div class="col-md-3">
+                <div class="card p-3 text-center shadow-sm">
+                    <h6>Total Credit</h6>
+                    <h3 id="totalCredit">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center shadow-sm">
+                    <h6>Total Debit</h6>
+                    <h3 id="totalDebit">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center shadow-sm">
+                    <h6>Net Balance</h6>
+                    <h3 id="netBalance">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center shadow-sm">
+                    <h6>Status</h6>
+                    <h3 id="profitLoss">–</h3>
+                    <small id="profitTrend"></small>
+                </div>
+            </div>
         </div>
 
         <!-- Charts -->
-        <div class="row g-4">
+        <div class="row g-4 mb-4">
             <div class="col-md-6">
-                <div class="card p-3"><h5>Cash Flow</h5><canvas id="cashFlowChart"></canvas></div>
+                <div class="card p-3 shadow-sm">
+                    <h5>Cash Flow</h5>
+                    <canvas id="cashFlowChart"></canvas>
+                </div>
             </div>
             <div class="col-md-6">
-                <div class="card p-3"><h5>Category Distribution</h5><canvas id="categoryChart"></canvas></div>
+                <div class="card p-3 shadow-sm">
+                    <h5>Category Distribution</h5>
+                    <canvas id="categoryChart"></canvas>
+                </div>
             </div>
+        </div>
+
+        <!-- Timeline Chart -->
+        <div class="card p-3 mb-4 shadow-sm">
+            <h5>Project Timeline</h5>
+            <canvas id="timelineChart"></canvas>
         </div>
 
         <!-- Comparison Charts -->
-        <h3 class="mt-5 mb-3 fw-bold">Project Comparison</h3>
+        <h3 class="mb-3">Project Comparison</h3>
         <div class="row g-4">
-            <div class="col-md-6"><div class="card p-3"><h5>Profit/Loss</h5><canvas id="projectProfitChart"></canvas></div></div>
-            <div class="col-md-6"><div class="card p-3"><h5>Credit vs Debit</h5><canvas id="creditDebitChart"></canvas></div></div>
+            <div class="col-md-6">
+                <div class="card p-3 shadow-sm">
+                    <h5>Profit/Loss Comparison</h5>
+                    <canvas id="projectProfitChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-3 shadow-sm">
+                    <h5>Credit vs Debit Comparison</h5>
+                    <canvas id="creditDebitChart"></canvas>
+                </div>
+            </div>
         </div>
 
-        <!-- Transactions -->
-        <div class="card mt-5">
+        <!-- Transaction Table -->
+        <div class="card mt-5 shadow-sm">
             <div class="card-body">
-                <h4 class="mb-3">Transactions</h4>
+                <h4>Transactions</h4>
                 <table class="table table-striped">
-                    <thead class="table-dark"><tr>
-                        <th>Date</th><th>Title</th><th>Type</th><th>Amount</th><th>Category</th>
-                    </tr></thead>
+                    <thead class="table-dark">
+                        <tr><th>Date</th><th>Title</th><th>Type</th><th>Amount</th><th>Category</th></tr>
+                    </thead>
                     <tbody id="transactionTable"></tbody>
                 </table>
             </div>
         </div>
 
     </div>
-
 </div>
 
 </body>
