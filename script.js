@@ -3,9 +3,39 @@ let projects = {};
 
 let cashFlowChart, categoryChart, projectProfitChart, creditDebitChart;
 
-// Excel Upload
-document.getElementById("excelFile").addEventListener("change", function (e) {
-    let file = e.target.files[0];
+/* ==========================
+   DRAG & DROP EXCEL IMPORT
+   ========================== */
+const dropZone = document.getElementById("dropZone");
+const fileInput = document.getElementById("fileInput");
+
+dropZone.addEventListener("click", () => fileInput.click());
+
+dropZone.addEventListener("dragover", e => {
+    e.preventDefault();
+    dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove("dragover");
+});
+
+dropZone.addEventListener("drop", e => {
+    e.preventDefault();
+    dropZone.classList.remove("dragover");
+    processFile(e.dataTransfer.files[0]);
+});
+
+fileInput.addEventListener("change", e => {
+    processFile(e.target.files[0]);
+});
+
+/* ==========================
+   PROCESS EXCEL FILE
+   ========================== */
+function processFile(file) {
+    if (!file) return;
+
     let reader = new FileReader();
 
     reader.onload = function (event) {
@@ -20,12 +50,15 @@ document.getElementById("excelFile").addEventListener("change", function (e) {
         renderComparisonCharts();
 
         document.getElementById("dashboard").style.display = "block";
+        dropZone.style.display = "none";
     };
 
     reader.readAsArrayBuffer(file);
-});
+}
 
-// Group data by project
+/* ==========================
+   GROUP DATA BY PROJECT
+   ========================== */
 function prepareProjects() {
     projects = {};
     excelData.forEach(row => {
@@ -34,7 +67,6 @@ function prepareProjects() {
     });
 }
 
-// Dropdown
 function populateProjectDropdown() {
     let select = document.getElementById("projectSelect");
     select.innerHTML = "";
@@ -50,7 +82,9 @@ function populateProjectDropdown() {
     updateDashboard();
 }
 
-// Dashboard Update
+/* ==========================
+   UPDATE DASHBOARD (Summary + Charts + Table)
+   ========================== */
 function updateDashboard() {
     let project = document.getElementById("projectSelect").value;
     let rows = projects[project];
@@ -61,7 +95,7 @@ function updateDashboard() {
     renderCategoryChart(rows);
 }
 
-// Summary Cards
+/* SUMMARY CARDS */
 function renderSummary(rows) {
     let credit = 0, debit = 0;
 
@@ -81,7 +115,7 @@ function renderSummary(rows) {
     status.style.color = balance >= 0 ? "green" : "red";
 }
 
-// Transaction Table
+/* TABLE */
 function renderTable(rows) {
     let table = document.getElementById("transactionTable");
     table.innerHTML = "";
@@ -94,12 +128,11 @@ function renderTable(rows) {
                 <td>${r.Type}</td>
                 <td>${r.Amount}</td>
                 <td>${r.Category}</td>
-            </tr>
-        `;
+            </tr>`;
     });
 }
 
-// Cash Flow Chart
+/* CASH FLOW CHART */
 function renderCashFlowChart(rows) {
     let labels = rows.map(r => r.Date);
     let values = rows.map(r => r.Type.toLowerCase() === "credit" ? r.Amount : -r.Amount);
@@ -114,17 +147,15 @@ function renderCashFlowChart(rows) {
                 label: "Cash Flow",
                 data: values,
                 borderColor: "#0d6efd",
-                fill: false,
                 tension: 0.3
             }]
         }
     });
 }
 
-// Category Chart
+/* CATEGORY CHART */
 function renderCategoryChart(rows) {
     let categoryTotals = {};
-
     rows.forEach(r => {
         if (!categoryTotals[r.Category]) categoryTotals[r.Category] = 0;
         categoryTotals[r.Category] += Number(r.Amount);
@@ -144,68 +175,46 @@ function renderCategoryChart(rows) {
     });
 }
 
-// -------------------------------
-// PROJECT COMPARISON CHARTS
-// -------------------------------
-
+/* ==========================
+   PROJECT COMPARISON CHARTS
+   ========================== */
 function renderComparisonCharts() {
-    let projectNames = Object.keys(projects);
-    let profits = [];
-    let credits = [];
-    let debits = [];
+    let names = Object.keys(projects);
+    let profits = [], credits = [], debits = [];
 
-    projectNames.forEach(project => {
+    names.forEach(project => {
         let rows = projects[project];
-        let credit = 0, debit = 0;
+        let c = 0, d = 0;
 
-        rows.forEach(r => {
-            if (r.Type.toLowerCase() === "credit") credit += Number(r.Amount);
-            else debit += Number(r.Amount);
-        });
+        rows.forEach(r => r.Type.toLowerCase() === "credit" ? c += Number(r.Amount) : d += Number(r.Amount));
 
-        profits.push(credit - debit);
-        credits.push(credit);
-        debits.push(debit);
+        profits.push(c - d);
+        credits.push(c);
+        debits.push(d);
     });
 
-    // Profit Chart
     if (projectProfitChart) projectProfitChart.destroy();
-
     projectProfitChart = new Chart(document.getElementById("projectProfitChart"), {
         type: "bar",
         data: {
-            labels: projectNames,
+            labels: names,
             datasets: [{
-                label: "Profit/Loss",
+                label: "Profit / Loss",
                 data: profits,
                 backgroundColor: profits.map(v => v >= 0 ? "#4caf50" : "#f44336")
             }]
         }
     });
 
-    // Credit vs Debit Chart
     if (creditDebitChart) creditDebitChart.destroy();
-
     creditDebitChart = new Chart(document.getElementById("creditDebitChart"), {
         type: "bar",
         data: {
-            labels: projectNames,
+            labels: names,
             datasets: [
-                {
-                    label: "Total Credit",
-                    data: credits,
-                    backgroundColor: "#0d6efd"
-                },
-                {
-                    label: "Total Debit",
-                    data: debits,
-                    backgroundColor: "#dc3545"
-                }
+                { label: "Credit", data: credits, backgroundColor: "#0d6efd" },
+                { label: "Debit", data: debits, backgroundColor: "#dc3545" }
             ]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { position: "top" } }
         }
     });
 }
