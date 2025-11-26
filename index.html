@@ -2,35 +2,66 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Project Dashboard</title>
+<title>Advanced Multi-Project Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="script.js" defer></script>
-<style>
-body.dark-mode { background:#121212; color:#f8f9fa; }
-.drop-zone { border: 3px dashed #0d6efd; padding:40px; text-align:center; cursor:pointer; border-radius:12px;}
-.drop-zone.dragover { background:#d0e3ff; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
 
 <div class="container py-4">
-  <button id="themeToggle" class="btn btn-secondary mb-3">Dark Mode</button>
 
-  <div id="dropZone" class="drop-zone mb-4">
-    <p>Drag & Drop Excel or click to select</p>
-    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
+  <!-- Theme Toggle -->
+  <div class="d-flex justify-content-end mb-3">
+    <button id="themeToggle" class="btn btn-secondary">Dark Mode</button>
   </div>
 
-  <div id="dashboard" style="display:none;">
-    <select id="projectSelect" class="form-select mb-3"></select>
-    <div class="row">
-      <div class="col-md-6"><canvas id="cashFlowChart"></canvas></div>
-      <div class="col-md-6"><canvas id="categoryChart"></canvas></div>
+  <!-- Excel Import -->
+  <div id="dropZone" class="drop-zone shadow-sm mb-4">
+    <h3>Import Excel File(s)</h3>
+    <p class="text-muted">Drag & drop Excel file(s) here, or click to select</p>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" multiple>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" style="display:none">
+
+    <!-- Project Selector -->
+    <div class="mb-3">
+      <label>Select Project:</label>
+      <select id="projectSelect" class="form-select"></select>
     </div>
-  </div>
-</div>
 
-</body>
-</html>
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4" id="summaryCards">
+      <div class="col-md-3">
+        <div class="card p-3 text-center shadow-sm">
+          <h6>Total Credit</h6>
+          <h3 id="totalCredit">0</h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-3 text-center shadow-sm">
+          <h6>Total Debit</h6>
+          <h3 id="totalDebit">0</h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-3 text-center shadow-sm">
+          <h6>Total Revenue</h6>
+          <h3 id="totalRevenue">0</h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-3 text-center shadow-sm">
+          <h6>Status</h6>
+          <h3 id="profitLoss">–</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-6
